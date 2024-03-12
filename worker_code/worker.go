@@ -37,25 +37,30 @@ func BasicAuth(server_name, username, token string) *jira.Client {
 }
 
 func GetTicketsJQL(jql string, client *jira.Client) []Issue {
-	issues, _, err := client.Issue.Search(context.Background(), jql, nil)
-	if err != nil {
-		panic(err)
+	var allissues []Issue
+	last := 0
+	for {
+		issues, _, err := client.Issue.Search(context.Background(), jql, &jira.SearchOptions{StartAt: last})
+		if err != nil {
+			panic(err)
+		}
+		if len(issues) == 0 {
+			break
+		}
+		for _, i := range issues {
+			allissues = append(allissues, Issue{
+				ID:          i.ID,
+				Key:         i.Key,
+				Priority:    i.Fields.Priority.Name,
+				Summary:     i.Fields.Summary,
+				Description: fmt.Sprintf("%v", i.Fields.Unknowns["customfield_11611"]),
+				AssetName:   fmt.Sprintf("%v", i.Fields.Unknowns["customfield_11607"]),
+				Assignee:    i.Fields.Assignee.EmailAddress,
+				Comment:     "",
+			})
+		}
+		last += len(issues)
 	}
-
-	allissues := []Issue{}
-	for _, i := range issues {
-		allissues = append(allissues, Issue{
-			ID:          i.ID,
-			Key:         i.Key,
-			Priority:    i.Fields.Priority.Name,
-			Summary:     i.Fields.Summary,
-			Description: fmt.Sprintf("%v", i.Fields.Unknowns["customfield_11611"]),
-			AssetName:   fmt.Sprintf("%v", i.Fields.Unknowns["customfield_11607"]),
-			Assignee:    i.Fields.Assignee.EmailAddress,
-			Comment:     "",
-		})
-	}
-
 	return allissues
 }
 
