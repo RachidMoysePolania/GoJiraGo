@@ -1,0 +1,16 @@
+name: Echo Input
+
+on: [push, pull_request]
+
+jobs:
+  echo_input:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Echo input
+        run: echo "Input value: ${{ env.INPUT_VALUE }}"
+        env:
+          INPUT_VALUE: ${{ github.event.inputs.input_value }}
