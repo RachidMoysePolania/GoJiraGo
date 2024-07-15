@@ -1,32 +1,19 @@
-name: Run Template
+name: Deploy
 
-on: workflow_dispatch
-# on: [push, pull_request] # Uncomment this if you want to trigger on push or PR
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
 
 jobs:
-  run_template:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Echo inputs
-        run: |
-          echo "Terraform Variables: ${{ env.TERRAFORM_VARS }}"
-          echo "Number of EC2 Instances: ${{ env.NUM_EC2_INSTANCES }}"
-          echo "Repository URL: ${{ env.REPO_URL }}"
-        env:
-          TERRAFORM_VARS: ${{ github.event.inputs.terraform_vars }}
-          NUM_EC2_INSTANCES: ${{ github.event.inputs.num_ec2_instances }}
-          REPO_URL: ${{ github.event.inputs.repo_url }}
-
-      - name: Run action in the specified repo
-        run: |
-          echo "Running action in repo: ${{ env.REPO_URL }}"
-          git clone ${{ env.REPO_URL }} repo
-          cd repo
-          # Assuming there is a script in the repo to execute
-          ./run-action.sh
-        env:
-          REPO_URL: ${{ github.event.inputs.repo_url }}
+      - name: Deploy
+        run: echo "Deploying to ${{ github.event.inputs.environment }}"
